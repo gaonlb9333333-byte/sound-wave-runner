@@ -8,8 +8,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sound Wave Runner" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-180.png" />
   <title>Sound Wave Runner 🎤</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -2245,13 +2243,6 @@ document.addEventListener('keydown',(e)=>{
 // BOOT
 lastTime=performance.now();
 requestAnimationFrame(startLoop);
-
-// PWA Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
-}
 </script>
 </body>
 </html>
