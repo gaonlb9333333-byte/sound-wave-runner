@@ -1,0 +1,9 @@
+
+
+ - Mozda dodati kristale i sa gorne strane pa da idu i oni random da se provlacis izmedju obe strane nekad
+
+ - Macking skok popraciti kad je u skoku
+
+ - Mobilna verzija za ona IOS i Android
+
+ - 

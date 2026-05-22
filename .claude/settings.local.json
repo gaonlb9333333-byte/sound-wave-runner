@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(pip install *)",
+      "Bash(python3 -m pip install Pillow --quiet)",
+      "Bash(python3 -c \"from PIL import Image; print\\('PIL OK'\\)\")",
+      "Bash(apt-get install *)",
+      "Bash(sudo apt-get install -y python3-pil)",
+      "Bash(python3 -c \"from PIL import Image; print\\('OK'\\)\")",
+      "Bash(python3 *)",
+      "Bash(convert --version)",
+      "Bash(ffmpeg -version)",
+      "Bash(node -e ' *)",
+      "Read(//tmp/**)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const Jimp=require\\('jimp'\\);console.log\\('jimp version:', Jimp.MIME_PNG\\);\")",
+      "Bash(node --check /tmp/game_check2.js)",
+      "Bash(sudo apt-get install -y ffmpeg)",
+      "Bash(ffmpeg.exe -version)",
+      "Bash(/mnt/c/Windows/System32/ffmpeg.exe -version)",
+      "Bash(node --check /tmp/chk.js)",
+      "Bash(curl -sS https://bootstrap.pypa.io/get-pip.py)",
+      "Bash(~/.local/bin/pip install *)",
+      "Bash(wait)",
+      "Bash(~/.local/bin/pip show *)",
+      "Bash(cp www/index.html index.html)",
+      "Bash(ls -la assets/)"
+    ]
+  }
+}
