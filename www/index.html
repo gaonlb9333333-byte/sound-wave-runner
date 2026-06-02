@@ -251,6 +251,7 @@ if(!playerName || playerName==='Player 1'){
 // TOUCH → CLICK mapping (preserves all existing click logic)
 cv.addEventListener('touchstart', e=>{
   e.preventDefault();
+  if(gameState==='playing'){player.jumpQueued=true;return;}
   const touch=e.touches[0];
   cv.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,
     clientX:touch.clientX, clientY:touch.clientY}));
@@ -1757,24 +1758,26 @@ function drawDeathScreen(){
   ctx.shadowBlur=14*rp;ctx.shadowColor=P.cyan;
   ctx.fillStyle=P.cyan;fillRR(rbx,rby,rbw,rbh,9);ctx.shadowBlur=0;
   ctx.fillStyle='#001a1a';ctx.font='bold 15px Segoe UI';ctx.fillText('▶  RETRY',GW/2,rby+23);
-  // ── Share button ──
-  const sbx=GW/2-88,sby=rby+42,sbw=176,sbh=30;
+  // ── Share / Best Scores / Home — isti stil ──
+  const btnW=176,btnH=28,btnX=GW/2-88,btnGap=34;
+  const sbx=btnX,sby=rby+42,sbw=btnW,sbh=btnH;
+  const lbx=btnX,lby=sby+btnGap,lbw=btnW,lbh=btnH;
+  const hbx=btnX,hby=lby+btnGap,hbw=btnW,hbh=btnH;
+  // Share
   ctx.fillStyle='rgba(58,0,96,0.85)';fillRR(sbx,sby,sbw,sbh,9);
   ctx.strokeStyle='#cc44ff88';ctx.lineWidth=1.2;ctx.strokeRect(sbx+1,sby+1,sbw-2,sbh-2);
   ctx.shadowBlur=0;ctx.fillStyle='#dd88ff';ctx.font='bold 13px Segoe UI';
-  ctx.fillText('📸  Share Score',GW/2,sby+19);
-  // ── Best Scores button ──
-  const lbx=GW/2-88,lby=sby+38,lbw=176,lbh=28;
+  ctx.fillText('📸  Share Score',GW/2,sby+18);
+  // Best Scores
   ctx.fillStyle='rgba(0,40,30,0.85)';fillRR(lbx,lby,lbw,lbh,9);
   ctx.strokeStyle='#00f5ff44';ctx.lineWidth=1;ctx.strokeRect(lbx+1,lby+1,lbw-2,lbh-2);
-  ctx.fillStyle='#88ffcc';ctx.font='13px Segoe UI';
+  ctx.fillStyle='#88ffcc';ctx.font='bold 13px Segoe UI';
   ctx.fillText('🏆  Best Scores',GW/2,lby+18);
-  // ── Home button ──
-  const hbx=GW/2-88,hby=lby+36,hbw=176,hbh=24;
+  // Home
   ctx.fillStyle='rgba(10,0,25,0.7)';fillRR(hbx,hby,hbw,hbh,9);
-  ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.strokeRect(hbx+1,hby+1,hbw-2,hbh-2);
-  ctx.fillStyle='#888888';ctx.font='12px Segoe UI';
-  ctx.fillText('🏠  Home',GW/2,hby+15);
+  ctx.strokeStyle='#ffffff33';ctx.lineWidth=1;ctx.strokeRect(hbx+1,hby+1,hbw-2,hbh-2);
+  ctx.fillStyle='#aaaaaa';ctx.font='bold 13px Segoe UI';
+  ctx.fillText('🏠  Home',GW/2,hby+18);
   ctx.restore();ctx.textAlign='left';
 }
 
