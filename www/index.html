@@ -1531,7 +1531,6 @@ function drawStartScreen(){
   ctx.clip();
   ctx.beginPath();
   drawECG(-wvOff);
-  ctx.beginPath();
   drawECG(wvW-wvOff);
   const ecgGrad=ctx.createLinearGradient(wvX,0,wvX+wvW,0);
   ecgGrad.addColorStop(0,'#00f5ff');
@@ -1652,9 +1651,11 @@ function drawStartScreen(){
   // VOICE CONTROLS — right side, full height, text-width only
   // ═══════════════════════════════════════════════════════════════
   const CTRLS=[
-    {col:'#5577ff',rgb:'85,119,255', icon:'😶', label:'WHISPER', act:'→ Slow Motion',bars:[3,5,3]},
-    {col:P.cyan,   rgb:'0,245,255',  icon:'🗣️', label:'SPEAK',   act:'→ Jump',       bars:[6,11,7]},
-    {col:P.orange, rgb:'255,107,0',  icon:'😱', label:'SCREAM',  act:'→ Big Jump!',  bars:[13,19,14]},
+    {col:'#5577ff',rgb:'85,119,255', icon:'😶', label:'QUIET',   act:'→ Slow down',  bars:[3,5,3]},
+    {col:P.cyan,   rgb:'0,245,255',  icon:'🗣️', label:'SPEAK',   act:'→ Speed up',   bars:[6,11,7]},
+    {col:P.orange, rgb:'255,107,0',  icon:'😱', label:'SCREAM',  act:'→ Max speed!', bars:[13,19,14]},
+    {col:'#aaffaa',rgb:'170,255,170',icon:'👆', label:'TAP',     act:'→ Jump',       bars:[5,5,5]},
+    {col:'#ffee88',rgb:'255,238,136',icon:'👆👆',label:'TAP x2',  act:'→ Air boost',  bars:[8,14,8]},
   ];
 
   // Auto-size panel to content — right-aligned, text-width only
@@ -1681,7 +1682,7 @@ function drawStartScreen(){
   ctx.fillStyle='rgba(140,110,220,0.70)';ctx.font='bold 8px Segoe UI';
   ctx.textAlign='left';
   ctx.letterSpacing='1.5px';
-  ctx.fillText('VOICE COMMANDS',vcX+2,vcY+12);
+  ctx.fillText('HOW TO PLAY',vcX+2,vcY+12);
   ctx.letterSpacing='0px';
 
   CTRLS.forEach((c,i)=>{
