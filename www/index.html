@@ -1979,6 +1979,7 @@ function micErrorLoop(timestamp){
 // GAME LOOP
 let lastTime=0;
 function gameLoop(timestamp){
+  try{
   const rawDt=Math.min((timestamp-lastTime)/16.67,3);
   lastTime=timestamp;frameCount++;
   beginFrame();
@@ -2050,6 +2051,7 @@ function gameLoop(timestamp){
 
   if(gameState==='dead'){ctx.restore();requestAnimationFrame(deadLoop);return;}
   ctx.restore();
+  }catch(err){console.warn('gameLoop err:',err);}
   requestAnimationFrame(gameLoop);
 }
 
