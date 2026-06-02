@@ -1,4 +1,4 @@
-const CACHE = 'swr-v3';
+const CACHE = 'swr-v10';
 const ASSETS = ['./', './index.html', './icon-192.png', './icon-512.png', './manifest.json'];
 
 self.addEventListener('install', e => {
@@ -14,7 +14,12 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // index.html uvek sa mreže — nikad iz keša
+  if(e.request.url.includes('index.html') || e.request.url.endsWith('/')){
+    e.respondWith(fetch(e.request).catch(() => caches.match('./index.html')));
+    return;
+  }
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('./index.html')))
+    caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
