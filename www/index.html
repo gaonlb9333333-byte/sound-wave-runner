@@ -1179,10 +1179,20 @@ function drawPlayer(){
   ctx.rotate(tilt);
   ctx.scale(-1,1); // flip sprite to face right
 
-  // Single moderate glow — colour by state
-  const glowCol=state==='dead'?P.red:slowMo?'#5566ff':P.cyan;
-  ctx.shadowColor=glowCol;
-  ctx.shadowBlur=18;
+  // Jak neon outline — crna macka sa svetlim bojama kao na ikonci
+  const glowCol=state==='dead'?P.red:slowMo?'#8844ff':P.cyan;
+  const glow2   =state==='dead'?'#ff4400':slowMo?'#cc44ff':P.orange;
+  // Prvi pas — narandžasto/roze glow (outer)
+  ctx.shadowColor=glow2; ctx.shadowBlur=32;
+  switch(state){
+    case 'run':  _drawRun(iw,ih);  break;
+    case 'jump': _drawJump(iw,ih); break;
+    case 'land': _drawLand(iw,ih); break;
+    case 'dead': _drawDead(iw,ih); break;
+    default:     _drawRun(iw,ih);
+  }
+  // Drugi pas — cyan/plavi glow (inner tight)
+  ctx.shadowColor=glowCol; ctx.shadowBlur=16;
 
   // ── State switch ───────────────────────────────────────────────────────────
   switch(state){
@@ -1651,11 +1661,11 @@ function drawStartScreen(){
   // VOICE CONTROLS — right side, full height, text-width only
   // ═══════════════════════════════════════════════════════════════
   const CTRLS=[
-    {col:'#5577ff',rgb:'85,119,255', icon:'😶', label:'QUIET',   act:'→ Slow down',  bars:[3,5,3]},
-    {col:P.cyan,   rgb:'0,245,255',  icon:'🗣️', label:'SPEAK',   act:'→ Speed up',   bars:[6,11,7]},
-    {col:P.orange, rgb:'255,107,0',  icon:'😱', label:'SCREAM',  act:'→ Max speed!', bars:[13,19,14]},
-    {col:'#aaffaa',rgb:'170,255,170',icon:'👆', label:'TAP',     act:'→ Jump',       bars:[5,5,5]},
-    {col:'#ffee88',rgb:'255,238,136',icon:'👆👆',label:'TAP x2',  act:'→ Air boost',  bars:[8,14,8]},
+    {col:'#5577ff',rgb:'85,119,255', icon:'😶', label:'QUIET',   act:'→ Slow down',  bars:[3,5,3], section:'🎤 VOICE'},
+    {col:P.cyan,   rgb:'0,245,255',  icon:'🗣️', label:'SPEAK',   act:'→ Speed up',   bars:[6,11,7], section:null},
+    {col:P.orange, rgb:'255,107,0',  icon:'😱', label:'SCREAM',  act:'→ Max speed!', bars:[13,19,14], section:null},
+    {col:'#aaffaa',rgb:'170,255,170',icon:'👆', label:'TAP',     act:'→ Jump',       bars:[5,5,5], section:'👆 TAP'},
+    {col:'#ffee88',rgb:'255,238,136',icon:'👆👆',label:'TAP x2',  act:'→ Air boost',  bars:[8,14,8], section:null},
   ];
 
   // Auto-size panel to content — right-aligned, text-width only
@@ -1667,33 +1677,43 @@ function drawStartScreen(){
   });
   const vcW=Math.round(maxRowW)+8;
   const vcX=GW-vcW-12;
-  const vcRowH=54;
-  const vcH=CTRLS.length*vcRowH+26;
-  const vcY=Math.round((GH-vcH)/2); // vertically centered
+  const vcRowH=46;
+  const numSections=2; // VOICE + TAP
+  const vcH=CTRLS.length*vcRowH+26+numSections*16;
+  const vcY=Math.round((GH-vcH)/2);
 
   ctx.save();
-  // Subtle dark panel
-  ctx.fillStyle='rgba(2,0,18,0.60)';
+  ctx.fillStyle='rgba(2,0,18,0.72)';
   fillRR(vcX-6,vcY,vcW+12,vcH,10);
-  ctx.strokeStyle='rgba(80,50,160,0.35)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(80,50,160,0.45)';ctx.lineWidth=1;
   ctx.strokeRect(vcX-5.5,vcY+0.5,vcW+11,vcH-1);
 
-  // Header: "VOICE COMMANDS"
-  ctx.fillStyle='rgba(140,110,220,0.70)';ctx.font='bold 8px Segoe UI';
-  ctx.textAlign='left';
-  ctx.letterSpacing='1.5px';
+  // Header
+  ctx.fillStyle='rgba(180,140,255,0.80)';ctx.font='bold 9px Segoe UI';
+  ctx.textAlign='left';ctx.letterSpacing='2px';
   ctx.fillText('HOW TO PLAY',vcX+2,vcY+12);
   ctx.letterSpacing='0px';
 
+  let rowY=vcY+20;
   CTRLS.forEach((c,i)=>{
-    const ry=vcY+20+i*vcRowH;
+    // Section header
+    if(c.section){
+      ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='bold 8px Segoe UI';
+      ctx.fillText(c.section, vcX+2, rowY+9);
+      // divider line
+      ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(vcX-4,rowY+13);ctx.lineTo(vcX+vcW+4,rowY+13);ctx.stroke();
+      rowY+=16;
+    }
+    const ry=rowY;
+    rowY+=vcRowH;
 
     // Left color accent bar
     ctx.fillStyle=c.col;ctx.globalAlpha=0.85;
     fillRR(vcX-4,ry+2,3,vcRowH-10,2);
     ctx.globalAlpha=1;
 
-    // Animated sound bars (mini equalizer icon)
+    // Animated sound bars
     const barX=vcX+4,barCY=ry+14;
     c.bars.forEach((bh,bi)=>{
       const animH=bh*(0.6+0.4*Math.sin(t*2.5+bi*0.8+i*0.6));
@@ -1703,7 +1723,6 @@ function drawStartScreen(){
     });
     ctx.globalAlpha=1;ctx.shadowBlur=0;
 
-    // Label (e.g. "WHISPER")
     ctx.font='bold 12px Segoe UI';ctx.fillStyle=c.col;
     ctx.shadowBlur=6;ctx.shadowColor=c.col;
     ctx.fillText(c.label,vcX+28,ry+16);ctx.shadowBlur=0;
