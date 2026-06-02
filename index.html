@@ -504,7 +504,7 @@ function stopMusic(){
 const PW=38,PH=40;
 const player={
   x:110, y:CFG.ground, w:PW, h:PH,
-  vy:0, onGround:true, jumpQueued:'none',
+  vy:0, onGround:true, jumpQueued:false, boostUsed:false,
   state:'run',
   squashX:1, squashY:1, sqVelX:0, sqVelY:0,
   trail:[], jumpAge:0, landHold:0,
@@ -513,27 +513,32 @@ const player={
     this.y=CFG.ground; this.vy=0; this.onGround=true; this.wasJumping=false;
     this.state='run';
     this.squashX=1; this.squashY=1; this.sqVelX=0; this.sqVelY=0;
-    this.trail=[]; this.jumpAge=0; this.landHold=0; this.jumpQueued='none';
+    this.trail=[]; this.jumpAge=0; this.landHold=0; this.jumpQueued=false; this.boostUsed=false;
   },
 
   update(dt){
     if(this.state==='dead') return; // freeze all physics when dead
 
-    // ── Jump trigger — single tap=small, double tap=big ──
-    if(this.onGround && this.jumpQueued!=='none'){
-      if(this.jumpQueued==='big'){
-        this.vy=CFG.jBig; this.squashY=1.35; this.squashX=0.72;
-        SFX.jumpBig();
-        spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.orange);
-        addShake(2,5);
-      } else {
-        this.vy=CFG.jSmall; this.squashY=1.2; this.squashX=0.84;
+    // ── Jump: tap na zemlji = skok, tap u vazduhu = boost (jednom) ──
+    if(this.jumpQueued){
+      if(this.onGround){
+        this.vy=CFG.jSmall; this.onGround=false;
+        this.squashY=1.2; this.squashX=0.84;
+        this.boostUsed=false;
         SFX.jumpSmall();
         spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.cyan);
+      } else if(!this.boostUsed){
+        this.vy=Math.min(this.vy, CFG.jBig); // dodaj boost ali ne preteraj
+        this.boostUsed=true;
+        this.squashY=1.3; this.squashX=0.75;
+        SFX.jumpBig();
+        spawnJumpBurst(this.x+this.w/2, this.y+this.h/2, P.orange);
+        addShake(1,3);
       }
-      this.onGround=false;
-      this.jumpQueued='none';
+      this.jumpQueued=false;
     }
+    // resetuj boost kad sleti
+    if(this.onGround) this.boostUsed=false;
 
     // ── Gravity — falls faster than rises (snappier arc) ──
     const gravMult = (this.vy>0 && !this.onGround) ? 1.40 : 1.0;
@@ -1841,17 +1846,10 @@ const sharePanel=document.getElementById('share-panel');
 
 // Jump overlay — handles tap-to-jump cleanly during gameplay
 const jumpOverlay=document.getElementById('jump-overlay');
-let lastTapTime=0;
 function doTapJump(){
   if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   if(gameState!=='playing') return;
-  const now=Date.now();
-  if(now-lastTapTime<300){
-    player.jumpQueued='big'; // double tap
-  } else {
-    player.jumpQueued='small'; // single tap
-  }
-  lastTapTime=now;
+  player.jumpQueued=true;
 }
 jumpOverlay.addEventListener('touchstart',e=>{
   e.preventDefault(); e.stopPropagation(); doTapJump();
