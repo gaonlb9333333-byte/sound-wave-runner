@@ -166,6 +166,9 @@
   </div>
 </div>
 
+<!-- Jump tap overlay — covers full screen during gameplay -->
+<div id="jump-overlay" style="display:none;position:fixed;inset:0;z-index:10;touch-action:none;"></div>
+
 <!-- Share panel -->
 <div id="share-panel">
   <div id="share-box">
@@ -1829,6 +1832,18 @@ function drawScoreboard(){
 
 // SHARE FUNCTION
 const sharePanel=document.getElementById('share-panel');
+
+// Jump overlay — handles tap-to-jump cleanly during gameplay
+const jumpOverlay=document.getElementById('jump-overlay');
+jumpOverlay.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(gameState==='playing') player.jumpQueued=true;
+},{passive:false});
+jumpOverlay.addEventListener('mousedown',e=>{
+  if(gameState==='playing') player.jumpQueued=true;
+});
+function setJumpOverlay(on){jumpOverlay.style.display=on?'block':'none';}
 const sharePreview=document.getElementById('share-preview');
 const shareScoreVal=document.getElementById('share-score-val');
 
@@ -2018,7 +2033,7 @@ function gameLoop(timestamp){
     }
     SFX.death();addShake(9,22);deathAnimT=0;deathFreeze=18;deathZoom=1.0;deathGlitch=1.0;deathSpin=0;
     spawnDeathExplosion(player.x+player.w/2,player.y+player.h/2);
-    gameState='dead';
+    gameState='dead';setJumpOverlay(false);
     stopMusic();
   }
   ctx.save();
@@ -2146,7 +2161,7 @@ function calibrationLoop(timestamp){
       try{localStorage.setItem('swr_cal',JSON.stringify({low:CFG.lowVol,high:CFG.highVol}));}catch(e){}
       SFX.go();addFloat('GO! 🎤',GW/2,GH/2,P.yellow,36);
       startMusic();gameFrame=0;
-      gameState='playing';lastTime=performance.now();requestAnimationFrame(gameLoop);
+      gameState='playing';setJumpOverlay(true);lastTime=performance.now();requestAnimationFrame(gameLoop);
       return;
     }
     SFX.milestone();
@@ -2176,7 +2191,7 @@ async function doStartGame(){
     lastTime=performance.now();requestAnimationFrame(calibrationLoop);
   } else {
     startMusic();gameFrame=0;
-    gameState='playing';lastTime=performance.now();requestAnimationFrame(gameLoop);
+    gameState='playing';setJumpOverlay(true);lastTime=performance.now();requestAnimationFrame(gameLoop);
   }
 }
 
