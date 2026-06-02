@@ -8,8 +8,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sound Wave Runner" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-180.png" />
   <title>Sound Wave Runner 🎤</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -500,7 +498,7 @@ function stopMusic(){
 const PW=38,PH=40;
 const player={
   x:110, y:CFG.ground, w:PW, h:PH,
-  vy:0, onGround:true, jumpQueued:false,
+  vy:0, onGround:true, wasJumping:false,
   state:'run',
   squashX:1, squashY:1, sqVelX:0, sqVelY:0,
   trail:[], jumpAge:0, landHold:0,
@@ -509,21 +507,32 @@ const player={
     this.y=CFG.ground; this.vy=0; this.onGround=true; this.wasJumping=false;
     this.state='run';
     this.squashX=1; this.squashY=1; this.sqVelX=0; this.sqVelY=0;
-    this.trail=[]; this.jumpAge=0; this.landHold=0; this.jumpQueued=false;
+    this.trail=[]; this.jumpAge=0; this.landHold=0;
   },
 
   update(dt){
     if(this.state==='dead') return; // freeze all physics when dead
 
-    // ── Jump trigger — tap/click anywhere during gameplay ──
-    if(this.onGround && this.jumpQueued){
-      this.vy=CFG.jBig; this.onGround=false;
-      this.squashY=1.35; this.squashX=0.72;
-      SFX.jumpBig();
-      spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.cyan);
-      addShake(2,5);
-      this.jumpQueued=false;
+    const isBig   = micVol>=CFG.highVol;
+    const isSmall = micVol>=CFG.lowVol && micVol<CFG.highVol;
+    const isSilent= micVol<CFG.lowVol;
+
+    // ── Jump trigger (only from ground, only on new voice input) ──
+    if(this.onGround && !this.wasJumping){
+      if(isBig){
+        this.vy=CFG.jBig; this.onGround=false;
+        this.squashY=1.35; this.squashX=0.72;
+        SFX.jumpBig();
+        spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.orange);
+        addShake(2,5);
+      } else if(isSmall){
+        this.vy=CFG.jSmall; this.onGround=false;
+        this.squashY=1.2; this.squashX=0.84;
+        SFX.jumpSmall();
+        spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.cyan);
+      }
     }
+    this.wasJumping = !isSilent;
 
     // ── Gravity — falls faster than rises (snappier arc) ──
     const gravMult = (this.vy>0 && !this.onGround) ? 1.40 : 1.0;
@@ -1957,12 +1966,12 @@ function gameLoop(timestamp){
   beginFrame();
   micVol=readMic();
   scheduleMusic();
-  // Voice controls speed: quiet=slow, loud=fast
-  const voiceRatio = Math.min(micVol / Math.max(CFG.highVol, 1), 1.5);
-  const speedMult = 0.35 + voiceRatio * 1.15; // 0.35 (silence) → 1.5 (scream)
-  const prevSlow=slowMo; slowMo = speedMult < 0.6;
+  const prevSlow=slowMo;slowMo=micVol<CFG.lowVol;
   if(slowMo&&!prevSlow)SFX.slowIn();
   if(!slowMo&&prevSlow)SFX.slowOut();
+  // Voice directly boosts speed: scream = faster running + jump
+  const voiceBoost = slowMo ? 0 : Math.max(0,(micVol-CFG.lowVol)/(CFG.highVol-CFG.lowVol)) * 0.45;
+  const speedMult=(slowMo?CFG.slowFactor:1.0) + voiceBoost;
   const effectiveSpd=gameSpeed*speedMult;
   const dt=rawDt*speedMult;
   player.update(dt);
@@ -2173,10 +2182,6 @@ async function doStartGame(){
 
 // INPUT
 async function handleClick(mx,my){
-  if(gameState==='playing'){
-    player.jumpQueued=true;
-    return;
-  }
   if(gameState==='start'){
     const rcw=114,rch=22,rcx=10,rcy=GH-28;
     if(isCalibrated&&mx>=rcx&&mx<=rcx+rcw&&my>=rcy&&my<=rcy+rch){
@@ -2232,20 +2237,12 @@ cv.addEventListener('click',async(e)=>{
 });
 document.addEventListener('keydown',(e)=>{
   if((e.key==='r'||e.key==='R')&&gameState==='dead'){resetGame();doStartGame();}
-  if(e.key===' '&&gameState==='playing'){player.jumpQueued=true;}
   if(e.key===' '&&(gameState==='start'||gameState==='dead')){handleClick(GW/2,GH/2);}
 });
 
 // BOOT
 lastTime=performance.now();
 requestAnimationFrame(startLoop);
-
-// PWA Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
-}
 </script>
 </body>
 </html>
