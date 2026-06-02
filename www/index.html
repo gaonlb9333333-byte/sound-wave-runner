@@ -581,8 +581,8 @@ const player={
 
     // ── Trail — only during jump ──
     if(this.state==='jump'){
-      const tCol  =isBig?P.orange:P.cyan;
-      const tAlpha=isBig?0.50:0.28;
+      const tCol  =P.cyan;
+      const tAlpha=0.35;
       this.trail.push({x:this.x, y:this.y, a:tAlpha, col:tCol});
       if(this.trail.length>6) this.trail.shift();
     } else if(this.trail.length) this.trail.shift();
