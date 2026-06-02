@@ -254,6 +254,7 @@ if(!playerName || playerName==='Player 1'){
 // TOUCH → CLICK mapping (preserves all existing click logic)
 cv.addEventListener('touchstart', e=>{
   e.preventDefault();
+  if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   if(gameState==='playing'){player.jumpQueued=true;return;}
   const touch=e.touches[0];
   cv.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,
@@ -1838,9 +1839,11 @@ const jumpOverlay=document.getElementById('jump-overlay');
 jumpOverlay.addEventListener('touchstart',e=>{
   e.preventDefault();
   e.stopPropagation();
+  if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   if(gameState==='playing') player.jumpQueued=true;
 },{passive:false});
 jumpOverlay.addEventListener('mousedown',e=>{
+  if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   if(gameState==='playing') player.jumpQueued=true;
 });
 function setJumpOverlay(on){jumpOverlay.style.display=on?'block':'none';}
