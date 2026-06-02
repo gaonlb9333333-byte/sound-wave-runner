@@ -261,7 +261,7 @@ cv.addEventListener('touchstart', e=>{
 },{passive:false});
 
 // CONFIG — tune these to change game feel
-const CFG={lowVol:15,highVol:55,jSmall:-12,jBig:-20,grav:0.58,baseSpeed:12,slowFactor:0.12,ground:240};
+const CFG={lowVol:15,highVol:55,jSmall:-10,jBig:-20,jBoost:-17,grav:0.85,baseSpeed:12,slowFactor:0.12,ground:240};
 
 // PALETTE
 const P={pink:'#ff2d78',cyan:'#00f5ff',yellow:'#ffe600',purple:'#9d00ff',orange:'#ff6b00',red:'#ff1744',white:'#ffffff'};
@@ -528,7 +528,7 @@ const player={
         SFX.jumpSmall();
         spawnJumpBurst(this.x+this.w/2, this.y+this.h, P.cyan);
       } else if(!this.boostUsed){
-        this.vy=Math.min(this.vy, CFG.jBig); // dodaj boost ali ne preteraj
+        this.vy=CFG.jBoost; // air boost — uvek isti osećaj
         this.boostUsed=true;
         this.squashY=1.3; this.squashX=0.75;
         SFX.jumpBig();
