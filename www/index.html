@@ -1769,6 +1769,12 @@ function drawDeathScreen(){
   ctx.strokeStyle='#00f5ff44';ctx.lineWidth=1;ctx.strokeRect(lbx+1,lby+1,lbw-2,lbh-2);
   ctx.fillStyle='#88ffcc';ctx.font='13px Segoe UI';
   ctx.fillText('🏆  Best Scores',GW/2,lby+18);
+  // ── Home button ──
+  const hbx=GW/2-88,hby=lby+36,hbw=176,hbh=24;
+  ctx.fillStyle='rgba(10,0,25,0.7)';fillRR(hbx,hby,hbw,hbh,9);
+  ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.strokeRect(hbx+1,hby+1,hbw-2,hbh-2);
+  ctx.fillStyle='#888888';ctx.font='12px Segoe UI';
+  ctx.fillText('🏠  Home',GW/2,hby+15);
   ctx.restore();ctx.textAlign='left';
 }
 
@@ -2202,6 +2208,8 @@ async function handleClick(mx,my){
     if(mx>=sbx&&mx<=sbx+sbw&&my>=sby&&my<=sby+sbh){shareScore();return;}
     const lbx=GW/2-88,lby=sby+38,lbw=176,lbh=28;
     if(mx>=lbx&&mx<=lbx+lbw&&my>=lby&&my<=lby+lbh){scoreboardVisible=!scoreboardVisible;return;}
+    const hbx=GW/2-88,hby=lby+36,hbw=176,hbh=24;
+    if(mx>=hbx&&mx<=hbx+hbw&&my>=hby&&my<=hby+hbh){resetGame();gameState='start';lastTime=performance.now();requestAnimationFrame(startLoop);return;}
     if(scoreboardVisible){
       const bx=GW/2-80,by=GH-36;
       if(mx>=bx&&mx<=bx+160&&my>=by&&my<=by+30){scoreboardVisible=false;return;}
